@@ -1,14 +1,21 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Download } from "lucide-react";
+import { Download, Palette } from "lucide-react";
 import { ModernTemplate } from "@/components/resume-templates/modern-template";
 import { ClassicTemplate } from "@/components/resume-templates/classic-template";
 import { ProfessionalTemplate } from "@/components/resume-templates/professional-template";
 import { CreativeTemplate } from "@/components/resume-templates/creative-template";
 import { MinimalistTemplate } from "@/components/resume-templates/minimalist-template";
 import { ExecutiveTemplate } from "@/components/resume-templates/executive-template";
+import { ModernProTemplate } from "@/components/resume-templates/modern-pro-template";
+import { CreativeBoldTemplate } from "@/components/resume-templates/creative-bold-template";
+import { ExecutiveEliteTemplate } from "@/components/resume-templates/executive-elite-template";
+import { VisualTemplateSelector } from "@/components/template-selector/visual-template-selector";
+import { PremiumUpgradeDialog } from "@/components/premium/premium-upgrade-dialog";
+import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface ResumePreviewProps {
   resumeData: any;
@@ -16,20 +23,39 @@ interface ResumePreviewProps {
 }
 
 const templates = [
-  { id: "modern", name: "Modern", component: ModernTemplate },
-  { id: "classic", name: "Classic", component: ClassicTemplate },
-  { id: "professional", name: "Professional", component: ProfessionalTemplate },
-  { id: "creative", name: "Creative", component: CreativeTemplate },
-  { id: "minimalist", name: "Minimalist", component: MinimalistTemplate },
-  { id: "executive", name: "Executive", component: ExecutiveTemplate },
+  { id: "modern", name: "Modern", component: ModernTemplate, isPremium: false },
+  { id: "classic", name: "Classic", component: ClassicTemplate, isPremium: false },
+  { id: "professional", name: "Professional", component: ProfessionalTemplate, isPremium: false },
+  { id: "creative", name: "Creative", component: CreativeTemplate, isPremium: true },
+  { id: "minimalist", name: "Minimalist", component: MinimalistTemplate, isPremium: true },
+  { id: "executive", name: "Executive", component: ExecutiveTemplate, isPremium: true },
+  { id: "modern-pro", name: "Modern Pro", component: ModernProTemplate, isPremium: true },
+  { id: "creative-bold", name: "Creative Bold", component: CreativeBoldTemplate, isPremium: true },
+  { id: "executive-elite", name: "Executive Elite", component: ExecutiveEliteTemplate, isPremium: true },
 ];
 
 export function ResumePreview({ resumeData, updateTemplate }: ResumePreviewProps) {
   const [selectedTemplate, setSelectedTemplate] = useState(resumeData?.template || "modern");
   const [isExporting, setIsExporting] = useState(false);
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const { user } = useAuth();
   const { toast } = useToast();
 
   const SelectedTemplateComponent = templates.find(t => t.id === selectedTemplate)?.component || ModernTemplate;
+
+  const handleTemplateChange = (templateId: string) => {
+    const template = templates.find(t => t.id === templateId);
+    
+    if (template?.isPremium && user?.plan === 'free') {
+      setShowUpgradeDialog(true);
+      return;
+    }
+    
+    setSelectedTemplate(templateId);
+    updateTemplate?.(templateId);
+    setShowTemplateSelector(false);
+  };
 
   const exportToPDF = async () => {
     setIsExporting(true);
@@ -115,17 +141,46 @@ export function ResumePreview({ resumeData, updateTemplate }: ResumePreviewProps
           Live Preview
         </h3>
         <div className="flex space-x-2">
-          <Select value={selectedTemplate} onValueChange={(value) => {
-            setSelectedTemplate(value);
-            updateTemplate?.(value);
-          }}>
+          <Dialog open={showTemplateSelector} onOpenChange={setShowTemplateSelector}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Palette className="w-4 h-4 mr-2" />
+                Browse Templates
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto">
+              <DialogHeader>
+                <DialogTitle>Choose Template</DialogTitle>
+              </DialogHeader>
+              <VisualTemplateSelector
+                selectedTemplate={selectedTemplate}
+                onTemplateSelect={handleTemplateChange}
+                userPlan={user?.plan || 'free'}
+                onUpgradeClick={() => {
+                  setShowTemplateSelector(false);
+                  setShowUpgradeDialog(true);
+                }}
+              />
+            </DialogContent>
+          </Dialog>
+          
+          <Select value={selectedTemplate} onValueChange={handleTemplateChange}>
             <SelectTrigger className="w-40 lg:w-48" data-testid="select-template">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {templates.map((template) => (
-                <SelectItem key={template.id} value={template.id}>
-                  {template.name}
+                <SelectItem 
+                  key={template.id} 
+                  value={template.id}
+                  disabled={template.isPremium && user?.plan === 'free'}
+                >
+                  <div className="flex items-center space-x-2">
+                    <span>{template.name}</span>
+                    {template.isPremium && (
+                      <span className="text-xs bg-yellow-100 text-yellow-800 px-1 rounded">PRO</span>
+                    )}
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -134,7 +189,7 @@ export function ResumePreview({ resumeData, updateTemplate }: ResumePreviewProps
           <Button 
             onClick={exportToPDF}
             disabled={isExporting}
-            className="bg-accent hover:bg-accent/90"
+            className="bg-blue-600 hover:bg-blue-700 text-white"
             data-testid="button-export-pdf"
           >
             {isExporting ? (
@@ -158,6 +213,13 @@ export function ResumePreview({ resumeData, updateTemplate }: ResumePreviewProps
           <SelectedTemplateComponent resumeData={resumeData} />
         </div>
       </div>
+
+      {/* Dialogs */}
+      <PremiumUpgradeDialog 
+        open={showUpgradeDialog} 
+        onOpenChange={setShowUpgradeDialog}
+        onUpgradeSuccess={() => setShowUpgradeDialog(false)}
+      />
     </div>
   );
 }

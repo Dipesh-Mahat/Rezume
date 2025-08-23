@@ -1,12 +1,44 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
-import { FileText, Users, Download } from "lucide-react";
+import { FileText, Users, Download, Crown, LogIn, User, LogOut } from "lucide-react";
+import { AuthDialog } from "@/components/auth/auth-dialog";
+import { PremiumUpgradeDialog } from "@/components/premium/premium-upgrade-dialog";
+import { VisualTemplateSelector } from "@/components/template-selector/visual-template-selector";
+import { useAuth } from "@/contexts/auth-context";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export default function LandingPage() {
   const [, setLocation] = useLocation();
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const { user, isAuthenticated, signOut } = useAuth();
 
   const handleStartBuilding = () => {
-    setLocation("/builder");
+    if (isAuthenticated) {
+      setLocation("/builder");
+    } else {
+      setShowAuthDialog(true);
+    }
+  };
+
+  const handleTemplateSelect = (templateId: string) => {
+    if (isAuthenticated) {
+      setLocation(`/builder?template=${templateId}`);
+    } else {
+      setShowAuthDialog(true);
+    }
+  };
+
+  const getUserInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   return (
@@ -21,13 +53,75 @@ export default function LandingPage() {
               </h1>
             </div>
             <div className="flex items-center space-x-4">
-              <Button 
-                onClick={handleStartBuilding}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-                data-testid="nav-start"
-              >
-                Get Started
-              </Button>
+              {isAuthenticated ? (
+                <>
+                  {user?.plan === 'free' && (
+                    <Button 
+                      variant="outline"
+                      onClick={() => setShowUpgradeDialog(true)}
+                      className="border-yellow-300 text-yellow-700 hover:bg-yellow-50"
+                    >
+                      <Crown className="w-4 h-4 mr-2" />
+                      Upgrade to Premium
+                    </Button>
+                  )}
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="bg-blue-500 text-white">
+                            {user?.fullName ? getUserInitials(user.fullName) : 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56" align="end" forceMount>
+                      <div className="flex items-center justify-start gap-2 p-2">
+                        <div className="flex flex-col space-y-1 leading-none">
+                          <p className="font-medium">{user?.fullName}</p>
+                          <p className="w-[200px] truncate text-sm text-muted-foreground">
+                            {user?.email}
+                          </p>
+                        </div>
+                      </div>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => setLocation('/builder')}>
+                        <User className="mr-2 h-4 w-4" />
+                        My Resumes
+                      </DropdownMenuItem>
+                      {user?.plan === 'free' && (
+                        <DropdownMenuItem onClick={() => setShowUpgradeDialog(true)}>
+                          <Crown className="mr-2 h-4 w-4" />
+                          Upgrade to Premium
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={signOut}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Sign Out
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </>
+              ) : (
+                <>
+                  <Button 
+                    variant="ghost"
+                    onClick={() => setShowAuthDialog(true)}
+                  >
+                    <LogIn className="w-4 h-4 mr-2" />
+                    Sign In
+                  </Button>
+                  <Button 
+                    onClick={handleStartBuilding}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    data-testid="nav-start"
+                  >
+                    Get Started
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -56,17 +150,14 @@ export default function LandingPage() {
                 <FileText className="mr-2 h-5 w-5" />
                 Start Building Resume
               </Button>
-            </div>
-
-            {/* Hero Image */}
-            <div className="relative max-w-4xl mx-auto">
-              <img 
-                src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=600" 
-                alt="Modern office workspace with laptop" 
-                className="rounded-xl shadow-2xl w-full h-auto"
-                data-testid="hero-image"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-xl" />
+              <Button 
+                size="lg" 
+                variant="outline"
+                onClick={() => setShowTemplateSelector(true)}
+                className="px-8 py-4 text-lg font-semibold"
+              >
+                Browse Templates
+              </Button>
             </div>
 
             {/* Feature Highlights */}
@@ -97,8 +188,88 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Template Preview Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Choose from Professional Templates
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Select from our collection of professionally designed templates. 
+              Free templates to get you started, premium templates for advanced customization.
+            </p>
+          </div>
+          
+          <div className="text-center">
+            <Button 
+              size="lg" 
+              onClick={() => setShowTemplateSelector(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold"
+            >
+              View All Templates
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Premium Features Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center px-4 py-2 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium mb-4">
+              <Crown className="w-4 h-4 mr-2" />
+              Premium Features
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Unlock Premium Templates & Features
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Take your resume to the next level with our premium templates and advanced customization options.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center p-6 rounded-lg border border-gray-200">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <FileText className="text-blue-600 h-6 w-6" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">15+ Premium Templates</h3>
+              <p className="text-gray-600">Access exclusive templates designed by professionals</p>
+            </div>
+            
+            <div className="text-center p-6 rounded-lg border border-gray-200">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <Download className="text-green-600 h-6 w-6" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Unlimited Downloads</h3>
+              <p className="text-gray-600">Download your resume as many times as you need</p>
+            </div>
+            
+            <div className="text-center p-6 rounded-lg border border-gray-200">
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <Users className="text-purple-600 h-6 w-6" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Priority Support</h3>
+              <p className="text-gray-600">Get help when you need it with priority support</p>
+            </div>
+          </div>
+          
+          <div className="text-center mt-8">
+            <Button 
+              size="lg" 
+              onClick={() => setShowUpgradeDialog(true)}
+              className="bg-yellow-600 hover:bg-yellow-700 text-white px-8 py-4 text-lg font-semibold"
+            >
+              <Crown className="mr-2 h-5 w-5" />
+              Upgrade to Premium
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-20">
+      <footer className="bg-white border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
@@ -137,6 +308,49 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Dialogs */}
+      <AuthDialog 
+        open={showAuthDialog} 
+        onOpenChange={setShowAuthDialog}
+        onAuthSuccess={() => setShowAuthDialog(false)}
+      />
+      
+      <PremiumUpgradeDialog 
+        open={showUpgradeDialog} 
+        onOpenChange={setShowUpgradeDialog}
+        onUpgradeSuccess={() => setShowUpgradeDialog(false)}
+      />
+
+      {/* Template Selector Dialog */}
+      {showTemplateSelector && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold">Choose Your Template</h2>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setShowTemplateSelector(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ✕
+                </Button>
+              </div>
+              
+              <VisualTemplateSelector
+                selectedTemplate="modern"
+                onTemplateSelect={handleTemplateSelect}
+                userPlan={user?.plan || 'free'}
+                onUpgradeClick={() => {
+                  setShowTemplateSelector(false);
+                  setShowUpgradeDialog(true);
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
