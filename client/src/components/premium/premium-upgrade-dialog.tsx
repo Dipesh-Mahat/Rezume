@@ -52,15 +52,15 @@ export function PremiumUpgradeDialog({ open, onOpenChange, onUpgradeSuccess }: P
 
   const plans = {
     monthly: {
-      price: 9.99,
+      price: 3.99,
       period: "month",
       savings: null,
       priceId: "price_monthly_premium"
     },
     yearly: {
-      price: 79.99,
+      price: 35.99,
       period: "year",
-      savings: "Save 33%",
+      savings: "Save 25%",
       priceId: "price_yearly_premium"
     }
   };
@@ -183,7 +183,7 @@ export function PremiumUpgradeDialog({ open, onOpenChange, onUpgradeSuccess }: P
                 </div>
                 {selectedPlan === 'yearly' && (
                   <CardDescription className="text-green-600 font-medium">
-                    Save $40 compared to monthly billing
+                    Save $12 compared to monthly billing
                   </CardDescription>
                 )}
               </CardHeader>

@@ -149,12 +149,6 @@ export function Navbar({ onUpgradeClick, onTemplateSelect, currentTemplate }: Na
                   <Palette className="w-4 h-4" />
                   <span>Browse Templates</span>
                 </Button>
-                <button
-                  onClick={() => setLocation("/#features")}
-                  className="text-gray-700 hover:text-blue-600 hover:bg-gray-50 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                >
-                  Features
-                </button>
               </>
             )}
           </div>
@@ -270,10 +264,10 @@ export function Navbar({ onUpgradeClick, onTemplateSelect, currentTemplate }: Na
         <Dialog open={true} onOpenChange={setShowTemplateDropdown}>
           <DialogContent className="max-w-6xl">
             <div className="p-4">
-              <h2 className="text-2xl font-bold mb-4">Choose Your Template</h2>
+              <h2 className="text-2xl font-bold mb-4">Browse Resume Templates</h2>
               <ErrorBoundary fallback={({ error, resetError }) => (
                 <div className="p-4 text-center">
-                  <p className="text-red-500 mb-4">Something went wrong with the template browser.</p>
+                  <p className="text-red-500 mb-4">Unable to load templates. Please try again later.</p>
                   <Button onClick={() => {
                     resetError();
                     setShowTemplateDropdown(false);
