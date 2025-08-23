@@ -5,7 +5,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 export function useResumeBuilder(resumeId?: string) {
-  const [resumeData, setResumeData] = useState({
+  const defaultResumeData = {
     personalInfo: {
       fullName: "",
       title: "",
@@ -20,7 +20,9 @@ export function useResumeBuilder(resumeId?: string) {
     summary: "",
     template: "modern",
     aiApiKey: "",
-  });
+  };
+  
+  const [resumeData, setResumeData] = useState(defaultResumeData);
 
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -33,9 +35,30 @@ export function useResumeBuilder(resumeId?: string) {
 
   useEffect(() => {
     if (existingResume) {
-      setResumeData(prev => ({ ...prev, ...existingResume }));
+      // Ensure we're merging in a safe way that preserves the structure
+      setResumeData(prev => {
+        // Cast the existingResume to the expected shape to avoid TypeScript errors
+        const typedResume = existingResume as typeof defaultResumeData;
+        
+        const merged = { 
+          ...prev, 
+          ...typedResume,
+          // Ensure personalInfo is properly merged and has all required fields
+          personalInfo: {
+            ...prev.personalInfo,
+            ...(typedResume.personalInfo || {})
+          }
+        };
+        
+        // Ensure all arrays exist even if they don't in the fetched data
+        merged.education = typedResume.education || [];
+        merged.experience = typedResume.experience || [];
+        merged.skills = typedResume.skills || [];
+        
+        return merged;
+      });
     }
-  }, [existingResume]);
+  }, [existingResume, defaultResumeData]);
 
   // Create new resume mutation
   const createResumeMutation = useMutation({
@@ -101,9 +124,36 @@ export function useResumeBuilder(resumeId?: string) {
 
   const updateTemplate = (template: string) => {
     setResumeData(prev => {
-      const newData = { ...prev, template };
-      updateResumeMutation.mutate(newData);
-      return newData;
+      try {
+        // Ensure we have a valid template string
+        const validTemplate = template && typeof template === 'string' ? template : 'modern';
+        
+        // Create a new data object with the template and ensuring all required fields exist
+        const newData = { 
+          ...prev, 
+          template: validTemplate,
+          // Ensure all required fields exist
+          personalInfo: prev.personalInfo || defaultResumeData.personalInfo,
+          education: prev.education || [],
+          experience: prev.experience || [],
+          skills: prev.skills || [],
+          summary: prev.summary || ""
+        };
+        
+        // Save the changes
+        updateResumeMutation.mutate(newData);
+        return newData;
+      } catch (error) {
+        console.error('Error updating template:', error);
+        toast({
+          title: "Template Update Error",
+          description: "Unable to update template. Using default template instead.",
+          variant: "destructive",
+        });
+        
+        // Return the previous data with the default template as fallback
+        return { ...prev, template: 'modern' };
+      }
     });
   };
 

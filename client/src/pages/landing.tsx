@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { FileText, Users, Download, Crown, LogIn, User, LogOut } from "lucide-react";
 import { AuthDialog } from "@/components/auth/auth-dialog";
 import { PremiumUpgradeDialog } from "@/components/premium/premium-upgrade-dialog";
-import { VisualTemplateSelector } from "@/components/template-selector/visual-template-selector";
+import { Navbar } from "@/components/navbar";
 import { useAuth } from "@/contexts/auth-context";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -13,8 +13,16 @@ export default function LandingPage() {
   const [, setLocation] = useLocation();
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
-  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const { user, isAuthenticated, signOut } = useAuth();
+
+  // Check for auth URL parameters
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const authParam = urlParams.get('auth');
+    if (authParam === 'signin' || authParam === 'signup') {
+      setShowAuthDialog(true);
+    }
+  }, []);
 
   const handleStartBuilding = () => {
     if (isAuthenticated) {
@@ -24,108 +32,16 @@ export default function LandingPage() {
     }
   };
 
-  const handleTemplateSelect = (templateId: string) => {
-    if (isAuthenticated) {
-      setLocation(`/builder?template=${templateId}`);
-    } else {
-      setShowAuthDialog(true);
-    }
-  };
-
-  const getUserInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
+  const handleAuthSuccess = () => {
+    setShowAuthDialog(false);
+    // Redirect to builder after successful authentication
+    setLocation("/builder");
   };
 
   return (
     <div className="min-h-screen bg-gradient-hero">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900" data-testid="logo">
-                Rezume
-              </h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              {isAuthenticated ? (
-                <>
-                  {user?.plan === 'free' && (
-                    <Button 
-                      variant="outline"
-                      onClick={() => setShowUpgradeDialog(true)}
-                      className="border-yellow-300 text-yellow-700 hover:bg-yellow-50"
-                    >
-                      <Crown className="w-4 h-4 mr-2" />
-                      Upgrade to Premium
-                    </Button>
-                  )}
-                  
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback className="bg-blue-500 text-white">
-                            {user?.fullName ? getUserInitials(user.fullName) : 'U'}
-                          </AvatarFallback>
-                        </Avatar>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56" align="end" forceMount>
-                      <div className="flex items-center justify-start gap-2 p-2">
-                        <div className="flex flex-col space-y-1 leading-none">
-                          <p className="font-medium">{user?.fullName}</p>
-                          <p className="w-[200px] truncate text-sm text-muted-foreground">
-                            {user?.email}
-                          </p>
-                        </div>
-                      </div>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => setLocation('/builder')}>
-                        <User className="mr-2 h-4 w-4" />
-                        My Resumes
-                      </DropdownMenuItem>
-                      {user?.plan === 'free' && (
-                        <DropdownMenuItem onClick={() => setShowUpgradeDialog(true)}>
-                          <Crown className="mr-2 h-4 w-4" />
-                          Upgrade to Premium
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={signOut}>
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Sign Out
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </>
-              ) : (
-                <>
-                  <Button 
-                    variant="ghost"
-                    onClick={() => setShowAuthDialog(true)}
-                  >
-                    <LogIn className="w-4 h-4 mr-2" />
-                    Sign In
-                  </Button>
-                  <Button 
-                    onClick={handleStartBuilding}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                    data-testid="nav-start"
-                  >
-                    Get Started
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Navbar */}
+      <Navbar onUpgradeClick={() => setShowUpgradeDialog(true)} />
 
       {/* Hero Section */}
       <section className="relative">
@@ -149,14 +65,6 @@ export default function LandingPage() {
               >
                 <FileText className="mr-2 h-5 w-5" />
                 Start Building Resume
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline"
-                onClick={() => setShowTemplateSelector(true)}
-                className="px-8 py-4 text-lg font-semibold"
-              >
-                Browse Templates
               </Button>
             </div>
 
@@ -199,16 +107,6 @@ export default function LandingPage() {
               Select from our collection of professionally designed templates. 
               Free templates to get you started, premium templates for advanced customization.
             </p>
-          </div>
-          
-          <div className="text-center">
-            <Button 
-              size="lg" 
-              onClick={() => setShowTemplateSelector(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold"
-            >
-              View All Templates
-            </Button>
           </div>
         </div>
       </section>
@@ -313,7 +211,7 @@ export default function LandingPage() {
       <AuthDialog 
         open={showAuthDialog} 
         onOpenChange={setShowAuthDialog}
-        onAuthSuccess={() => setShowAuthDialog(false)}
+        onAuthSuccess={handleAuthSuccess}
       />
       
       <PremiumUpgradeDialog 
@@ -323,34 +221,7 @@ export default function LandingPage() {
       />
 
       {/* Template Selector Dialog */}
-      {showTemplateSelector && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold">Choose Your Template</h2>
-                <Button 
-                  variant="ghost" 
-                  onClick={() => setShowTemplateSelector(false)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  ✕
-                </Button>
-              </div>
-              
-              <VisualTemplateSelector
-                selectedTemplate="modern"
-                onTemplateSelect={handleTemplateSelect}
-                userPlan={user?.plan || 'free'}
-                onUpgradeClick={() => {
-                  setShowTemplateSelector(false);
-                  setShowUpgradeDialog(true);
-                }}
-              />
-            </div>
-          </div>
-        </div>
-      )}
+            {/* Template Selector Dialog removed - now handled in navbar */}
     </div>
   );
 }

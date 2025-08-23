@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Download, Palette } from "lucide-react";
+import { Download, Palette, AlertTriangle } from "lucide-react";
 import { ModernTemplate } from "@/components/resume-templates/modern-template";
 import { ClassicTemplate } from "@/components/resume-templates/classic-template";
 import { ProfessionalTemplate } from "@/components/resume-templates/professional-template";
@@ -16,6 +16,7 @@ import { PremiumUpgradeDialog } from "@/components/premium/premium-upgrade-dialo
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 interface ResumePreviewProps {
   resumeData: any;
@@ -26,9 +27,9 @@ const templates = [
   { id: "modern", name: "Modern", component: ModernTemplate, isPremium: false },
   { id: "classic", name: "Classic", component: ClassicTemplate, isPremium: false },
   { id: "professional", name: "Professional", component: ProfessionalTemplate, isPremium: false },
-  { id: "creative", name: "Creative", component: CreativeTemplate, isPremium: true },
-  { id: "minimalist", name: "Minimalist", component: MinimalistTemplate, isPremium: true },
-  { id: "executive", name: "Executive", component: ExecutiveTemplate, isPremium: true },
+  { id: "creative", name: "Creative Designer", component: CreativeTemplate, isPremium: true },
+  { id: "minimalist", name: "Clean Minimalist", component: MinimalistTemplate, isPremium: true },
+  { id: "executive", name: "Executive Traditional", component: ExecutiveTemplate, isPremium: true },
   { id: "modern-pro", name: "Modern Pro", component: ModernProTemplate, isPremium: true },
   { id: "creative-bold", name: "Creative Bold", component: CreativeBoldTemplate, isPremium: true },
   { id: "executive-elite", name: "Executive Elite", component: ExecutiveEliteTemplate, isPremium: true },
@@ -141,51 +142,6 @@ export function ResumePreview({ resumeData, updateTemplate }: ResumePreviewProps
           Live Preview
         </h3>
         <div className="flex space-x-2">
-          <Dialog open={showTemplateSelector} onOpenChange={setShowTemplateSelector}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Palette className="w-4 h-4 mr-2" />
-                Browse Templates
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto">
-              <DialogHeader>
-                <DialogTitle>Choose Template</DialogTitle>
-              </DialogHeader>
-              <VisualTemplateSelector
-                selectedTemplate={selectedTemplate}
-                onTemplateSelect={handleTemplateChange}
-                userPlan={user?.plan || 'free'}
-                onUpgradeClick={() => {
-                  setShowTemplateSelector(false);
-                  setShowUpgradeDialog(true);
-                }}
-              />
-            </DialogContent>
-          </Dialog>
-          
-          <Select value={selectedTemplate} onValueChange={handleTemplateChange}>
-            <SelectTrigger className="w-40 lg:w-48" data-testid="select-template">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {templates.map((template) => (
-                <SelectItem 
-                  key={template.id} 
-                  value={template.id}
-                  disabled={template.isPremium && user?.plan === 'free'}
-                >
-                  <div className="flex items-center space-x-2">
-                    <span>{template.name}</span>
-                    {template.isPremium && (
-                      <span className="text-xs bg-yellow-100 text-yellow-800 px-1 rounded">PRO</span>
-                    )}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
           <Button 
             onClick={exportToPDF}
             disabled={isExporting}
@@ -210,7 +166,53 @@ export function ResumePreview({ resumeData, updateTemplate }: ResumePreviewProps
       {/* Resume Preview */}
       <div className="bg-white rounded-lg shadow-lg overflow-hidden" style={{ aspectRatio: '8.5/11' }}>
         <div id="resume-content" className="resume-preview p-4 lg:p-8 h-full overflow-y-auto">
-          <SelectedTemplateComponent resumeData={resumeData} />
+          <ErrorBoundary fallback={({ error, resetError }) => (
+            <div className="p-4 text-center">
+              <div className="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                <AlertTriangle className="w-6 h-6 text-red-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-red-900">Template Error</h3>
+              <p className="text-red-600 mb-4">Unable to render this template with the current data.</p>
+              <Button onClick={() => {
+                resetError();
+                setSelectedTemplate("modern");
+              }} variant="outline">
+                Switch to Modern Template
+              </Button>
+            </div>
+          )}>
+            {(() => {
+              try {
+                // Make sure resumeData has all required fields with fallback values
+                const safeResumeData = {
+                  ...resumeData,
+                  personalInfo: resumeData?.personalInfo || {
+                    fullName: "Your Name",
+                    title: "Your Title",
+                    email: "email@example.com",
+                    phone: "(555) 123-4567",
+                    location: "Your Location"
+                  },
+                  education: resumeData?.education || [],
+                  experience: resumeData?.experience || [],
+                  skills: resumeData?.skills || [],
+                  summary: resumeData?.summary || ""
+                };
+                
+                return <SelectedTemplateComponent resumeData={safeResumeData} />;
+              } catch (error) {
+                console.error("Error rendering template:", error);
+                return (
+                  <div className="p-4 text-center">
+                    <p className="text-red-600 mb-2">Template rendering error</p>
+                    <Button onClick={() => setSelectedTemplate("modern")} size="sm">
+                      Switch to Default Template
+                    </Button>
+                  </div>
+                );
+              }
+            })()}
+          </ErrorBoundary>
         </div>
       </div>
 

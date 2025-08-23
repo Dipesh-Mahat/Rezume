@@ -222,25 +222,6 @@ export function PremiumUpgradeDialog({ open, onOpenChange, onUpgradeSuccess }: P
                 </Button>
               </CardFooter>
             </Card>
-
-            <p className="text-xs text-gray-500 text-center">
-              Cancel anytime. No questions asked.
-            </p>
-          </div>
-        </div>
-
-        {/* Testimonials or Social Proof */}
-        <div className="mt-8 p-6 bg-gray-50 rounded-lg">
-          <div className="text-center">
-            <div className="flex justify-center space-x-1 mb-3">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star key={star} className="w-5 h-5 text-yellow-400 fill-current" />
-              ))}
-            </div>
-            <p className="text-gray-600 italic">
-              "Rezume Premium helped me land my dream job! The templates are professional and the customization options are amazing."
-            </p>
-            <p className="text-sm text-gray-500 mt-2">- Sarah K., Software Engineer</p>
           </div>
         </div>
       </DialogContent>

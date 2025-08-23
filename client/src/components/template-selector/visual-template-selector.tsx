@@ -13,6 +13,11 @@ import { ExecutiveTemplate } from "@/components/resume-templates/executive-templ
 import { ModernProTemplate } from "@/components/resume-templates/modern-pro-template";
 import { CreativeBoldTemplate } from "@/components/resume-templates/creative-bold-template";
 import { ExecutiveEliteTemplate } from "@/components/resume-templates/executive-elite-template";
+import { TechTemplate } from "@/components/resume-templates/tech-template";
+import { HealthcareTemplate } from "@/components/resume-templates/healthcare-template";
+import { MarketingTemplate } from "@/components/resume-templates/marketing-template";
+import { TeacherTemplate } from "@/components/resume-templates/teacher-template";
+import { FinanceTemplate } from "@/components/resume-templates/finance-template";
 
 interface TemplateOption {
   id: string;
@@ -20,10 +25,11 @@ interface TemplateOption {
   description: string;
   component: React.ComponentType<any>;
   isPremium: boolean;
-  category: 'modern' | 'classic' | 'creative' | 'executive';
+  category: 'modern' | 'classic' | 'creative' | 'executive' | 'tech' | 'healthcare' | 'marketing' | 'education' | 'finance';
   previewImage?: string;
 }
 
+// Ensure sampleResumeData is properly initialized with all required fields
 const sampleResumeData = {
   personalInfo: {
     fullName: "Sarah Johnson",
@@ -79,6 +85,7 @@ const sampleResumeData = {
     { name: "Docker", category: "devops", level: "intermediate" }
   ]
 };
+
 
 const templates: TemplateOption[] = [
   {
@@ -153,6 +160,38 @@ const templates: TemplateOption[] = [
     component: ExecutiveEliteTemplate,
     isPremium: true,
     category: 'executive'
+  },
+  {
+    id: "tech",
+    name: "Tech Innovator",
+    description: "Modern template designed for software engineers and tech professionals",
+    component: TechTemplate,
+    isPremium: false,
+    category: 'tech'
+  },
+  {
+    id: "marketing",
+    name: "Marketing Pro",
+    description: "Vibrant and creative template perfect for marketing and sales professionals",
+    component: MarketingTemplate,
+    isPremium: true,
+    category: 'marketing'
+  },
+  {
+    id: "teacher",
+    name: "Education Elite",
+    description: "Professional template tailored for educators and academic professionals",
+    component: TeacherTemplate,
+    isPremium: true,
+    category: 'education'
+  },
+  {
+    id: "finance",
+    name: "Finance Pro",
+    description: "Sophisticated template designed for finance and accounting professionals",
+    component: FinanceTemplate,
+    isPremium: true,
+    category: 'finance'
   }
 ];
 
@@ -187,14 +226,35 @@ export function VisualTemplateSelector({
   };
 
   const renderTemplatePreview = (template: TemplateOption) => {
+    if (!template || !template.component) {
+      return <div>Template not available</div>;
+    }
+    
     const TemplateComponent = template.component;
-    return (
-      <div className="w-full h-full scale-[0.25] origin-top-left transform">
-        <div className="w-[800px] h-[1000px]">
-          <TemplateComponent resumeData={sampleResumeData} />
+    // Make sure we have sample data with required fields
+    const safeResumeData = {
+      ...sampleResumeData,
+      personalInfo: sampleResumeData.personalInfo || {
+        fullName: "Sample Name",
+        title: "Sample Title",
+        email: "sample@example.com",
+        phone: "(555) 123-4567",
+        location: "Sample Location"
+      }
+    };
+    
+    try {
+      return (
+        <div className="w-full h-full scale-[0.25] origin-top-left transform">
+          <div className="w-[800px] h-[1000px]">
+            <TemplateComponent resumeData={safeResumeData} />
+          </div>
         </div>
-      </div>
-    );
+      );
+    } catch (error) {
+      console.error("Error rendering template preview:", error);
+      return <div>Failed to render template</div>;
+    }
   };
 
   return (
@@ -314,7 +374,26 @@ export function VisualTemplateSelector({
           <div className="mt-4">
             {previewTemplate && (
               <div className="w-full border rounded-lg overflow-hidden bg-white">
-                <previewTemplate.component resumeData={sampleResumeData} />
+                {(() => {
+                  try {
+                    // Make sure we have sample data with required fields
+                    const safeResumeData = {
+                      ...sampleResumeData,
+                      personalInfo: sampleResumeData.personalInfo || {
+                        fullName: "Sample Name",
+                        title: "Sample Title",
+                        email: "sample@example.com",
+                        phone: "(555) 123-4567",
+                        location: "Sample Location"
+                      }
+                    };
+                    
+                    return <previewTemplate.component resumeData={safeResumeData} />;
+                  } catch (error) {
+                    console.error("Error rendering template preview:", error);
+                    return <div className="p-4">Failed to render template preview</div>;
+                  }
+                })()}
               </div>
             )}
           </div>

@@ -10,10 +10,13 @@ import { SummaryStep } from "@/components/form-steps/summary";
 import { ResumePreview } from "@/components/resume-preview";
 import { LoadingSpinner, PageLoadingSpinner } from "@/components/loading-spinner";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { Navbar } from "@/components/navbar";
+import { PremiumUpgradeDialog } from "@/components/premium/premium-upgrade-dialog";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Eye, Save, CheckCircle } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/contexts/auth-context";
 
 const STEPS = [
   { id: 1, name: "Personal Info", component: PersonalInfoStep },
@@ -26,7 +29,9 @@ const STEPS = [
 export default function ResumeBuilder() {
   const [match, params] = useRoute("/builder/:id?");
   const [currentStep, setCurrentStep] = useState(1);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const isMobile = useIsMobile();
+  const { user } = useAuth();
   
   const { resumeData, updateResumeData, updateTemplate, createResume, isLoading, isSaving } = useResumeBuilder(params?.id);
   
@@ -53,6 +58,14 @@ export default function ResumeBuilder() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <ErrorBoundary>
+        <Navbar 
+          onUpgradeClick={() => setShowUpgradeDialog(true)} 
+          onTemplateSelect={updateTemplate}
+          currentTemplate={resumeData.template}
+        />
+      </ErrorBoundary>
+      
       <div className="flex flex-col lg:flex-row h-screen">
         {/* Form Sidebar */}
         <div className="w-full lg:w-1/2 bg-white shadow-lg overflow-y-auto">
@@ -66,12 +79,14 @@ export default function ResumeBuilder() {
 
             {/* Form Content */}
             <div className="mt-8">
-              {CurrentStepComponent && (
-                <CurrentStepComponent
-                  data={resumeData}
-                  updateData={updateResumeData}
-                />
-              )}
+              <ErrorBoundary>
+                {CurrentStepComponent && (
+                  <CurrentStepComponent
+                    data={resumeData}
+                    updateData={updateResumeData}
+                  />
+                )}
+              </ErrorBoundary>
             </div>
 
             {/* Navigation Buttons */}
@@ -115,7 +130,9 @@ export default function ResumeBuilder() {
 
         {/* Desktop Preview Panel */}
         <div className="hidden lg:flex lg:w-1/2 bg-gray-100 p-4 lg:p-6">
-          <ResumePreview resumeData={resumeData} updateTemplate={updateTemplate} />
+          <ErrorBoundary>
+            <ResumePreview resumeData={resumeData} updateTemplate={updateTemplate} />
+          </ErrorBoundary>
         </div>
       </div>
 
@@ -133,11 +150,18 @@ export default function ResumeBuilder() {
           </SheetTrigger>
           <SheetContent side="bottom" className="h-[90vh]">
             <div className="h-full overflow-y-auto">
-              <ResumePreview resumeData={resumeData} updateTemplate={updateTemplate} />
+              <ErrorBoundary>
+                <ResumePreview resumeData={resumeData} updateTemplate={updateTemplate} />
+              </ErrorBoundary>
             </div>
           </SheetContent>
         </Sheet>
       )}
+
+      <PremiumUpgradeDialog 
+        open={showUpgradeDialog} 
+        onOpenChange={setShowUpgradeDialog} 
+      />
     </div>
   );
 }
