@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+
+# Build outputs
+dist/
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+
+# Local development
+.local/
+
+# Server public (generated)
+server/public/
