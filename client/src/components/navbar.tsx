@@ -84,16 +84,6 @@ export function Navbar({ onUpgradeClick, onTemplateSelect, currentTemplate }: Na
                   );
                 })}
 
-                {/* Browse Templates Button - always visible for authenticated users */}
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowTemplateDropdown(true)}
-                  className="flex items-center space-x-2"
-                >
-                  <Palette className="w-4 h-4" />
-                  <span>Browse Templates</span>
-                </Button>
-
                 {/* Template Selector - only show in builder page */}
                 {location === "/builder" && onTemplateSelect && (
                 <DropdownMenu>
@@ -140,21 +130,22 @@ export function Navbar({ onUpgradeClick, onTemplateSelect, currentTemplate }: Na
               </>
             ) : (
               // Navigation for non-authenticated users
-              <>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowTemplateDropdown(true)}
-                  className="flex items-center space-x-2"
-                >
-                  <Palette className="w-4 h-4" />
-                  <span>Browse Templates</span>
-                </Button>
-              </>
+              <></>
             )}
           </div>
 
           {/* User Actions */}
           <div className="flex items-center space-x-4">
+            {/* Templates Button - Always visible */}
+            <Button 
+              variant="outline" 
+              onClick={() => setShowTemplateDropdown(true)}
+              className="flex items-center"
+            >
+              <Palette className="w-4 h-4 mr-1" />
+              <span>Templates</span>
+            </Button>
+            
             {isAuthenticated ? (
               <>
                 {user?.plan === 'free' && (
@@ -253,25 +244,35 @@ export function Navbar({ onUpgradeClick, onTemplateSelect, currentTemplate }: Na
               className="flex items-center space-x-3 w-full px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
             >
               <Palette className="w-4 h-4" />
-              <span>Browse Templates</span>
+              <span>Templates</span>
             </button>
           </div>
         </div>
       )}
       
       {/* Visual Template Selector Dialog */}
-      {showTemplateDropdown && (
-        <Dialog open={true} onOpenChange={setShowTemplateDropdown}>
-          <DialogContent className="max-w-6xl">
-            <div className="p-4">
-              <h2 className="text-2xl font-bold mb-4">Browse Resume Templates</h2>
+      <Dialog open={showTemplateDropdown} onOpenChange={setShowTemplateDropdown}>
+        <DialogContent className="max-w-6xl">
+          <div className="p-4">
+            <h2 className="text-2xl font-bold mb-4">Template Gallery</h2>
               <ErrorBoundary fallback={({ error, resetError }) => (
                 <div className="p-4 text-center">
-                  <p className="text-red-500 mb-4">Unable to load templates. Please try again later.</p>
-                  <Button onClick={() => {
-                    resetError();
-                    setShowTemplateDropdown(false);
-                  }}>Close</Button>
+                  <p className="text-red-500 mb-4">Oops! We couldn't load the templates. Please try refreshing the page.</p>
+                  <div className="flex space-x-2 justify-center">
+                    <Button onClick={() => {
+                      resetError();
+                      // Try to reload templates
+                      setTimeout(() => setShowTemplateDropdown(true), 100);
+                    }}>
+                      Try Again
+                    </Button>
+                    <Button variant="outline" onClick={() => {
+                      resetError();
+                      setShowTemplateDropdown(false);
+                    }}>
+                      Close
+                    </Button>
+                  </div>
                 </div>
               )}>
                 <VisualTemplateSelector
@@ -292,7 +293,6 @@ export function Navbar({ onUpgradeClick, onTemplateSelect, currentTemplate }: Na
             </div>
           </DialogContent>
         </Dialog>
-      )}
     </nav>
   );
 }
