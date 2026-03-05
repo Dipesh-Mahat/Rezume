@@ -1,52 +1,15 @@
-import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, json } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const resumes = pgTable("resumes", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  personalInfo: json("personal_info").$type<{
-    fullName: string;
-    title: string;
-    email: string;
-    phone: string;
-    location: string;
-    linkedin?: string;
-  }>().notNull(),
-  education: json("education").$type<Array<{
-    id: string;
-    degree: string;
-    school: string;
-    graduationYear: string;
-    gpa?: string;
-  }>>().notNull(),
-  experience: json("experience").$type<Array<{
-    id: string;
-    title: string;
-    company: string;
-    startDate: string;
-    endDate: string;
-    current: boolean;
-    description: string;
-    achievements: string[];
-  }>>().notNull(),
-  skills: json("skills").$type<Array<{
-    id: string;
-    name: string;
-    category: string;
-    level: 'beginner' | 'intermediate' | 'advanced' | 'expert';
-  }>>().notNull(),
-  summary: text("summary").notNull(),
-  template: varchar("template").notNull().default("modern"),
-  aiApiKey: text("ai_api_key"),
-});
-
-export const insertResumeSchema = createInsertSchema(resumes).omit({
-  id: true,
-});
-
-export type InsertResume = z.infer<typeof insertResumeSchema>;
-export type Resume = typeof resumes.$inferSelect;
+// Resume data types
+export interface ResumeData {
+  personalInfo: PersonalInfo;
+  education: Education[];
+  experience: Experience[];
+  skills: Skill[];
+  summary: string;
+  template: string;
+  aiApiKey?: string;
+}
 
 // Individual section schemas for form validation
 export const personalInfoSchema = z.object({

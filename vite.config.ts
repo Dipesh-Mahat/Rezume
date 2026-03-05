@@ -13,25 +13,15 @@ export default defineConfig({
   },
   root: path.resolve(import.meta.dirname, "client"),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    outDir: path.resolve(import.meta.dirname, "dist"),
     emptyOutDir: true,
     target: 'es2020',
     minify: 'esbuild',
-    sourcemap: process.env.NODE_ENV === 'development',
+    sourcemap: false,
   },
   server: {
-    fs: {
-      strict: true,
-      deny: ["**/.*"],
-    },
     host: true,
     port: 5173,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3000',
-        changeOrigin: true,
-      },
-    },
   },
   preview: {
     port: 4173,
