@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { useRoute } from "wouter";
+import { useState } from "react";
 import { useResumeBuilder } from "@/hooks/use-resume-builder";
 import { ProgressStepper } from "@/components/progress-stepper";
 import { PersonalInfoStep } from "@/components/form-steps/personal-info";
@@ -8,15 +7,13 @@ import { ExperienceStep } from "@/components/form-steps/experience";
 import { SkillsStep } from "@/components/form-steps/skills";
 import { SummaryStep } from "@/components/form-steps/summary";
 import { ResumePreview } from "@/components/resume-preview";
-import { LoadingSpinner, PageLoadingSpinner } from "@/components/loading-spinner";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { Navbar } from "@/components/navbar";
-import { PremiumUpgradeDialog } from "@/components/premium/premium-upgrade-dialog";
+import { DonationPopup, useDonationPopup } from "@/components/donation-popup";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, Eye, Save, CheckCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Eye, CheckCircle } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useAuth } from "@/contexts/auth-context";
 
 const STEPS = [
   { id: 1, name: "Personal Info", component: PersonalInfoStep },
@@ -27,18 +24,12 @@ const STEPS = [
 ];
 
 export default function ResumeBuilder() {
-  const [match, params] = useRoute("/builder/:id?");
   const [currentStep, setCurrentStep] = useState(1);
-  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const isMobile = useIsMobile();
-  const { user } = useAuth();
+  const { showDonation, setShowDonation } = useDonationPopup();
   
-  const { resumeData, updateResumeData, updateTemplate, createResume, isLoading, isSaving } = useResumeBuilder(params?.id);
+  const { resumeData, updateResumeData, updateTemplate } = useResumeBuilder();
   
-  if (isLoading) {
-    return <PageLoadingSpinner text="Loading your resume..." />;
-  }
-
   const CurrentStepComponent = STEPS.find(step => step.id === currentStep)?.component;
   
   const handleNext = () => {
@@ -60,9 +51,10 @@ export default function ResumeBuilder() {
     <div className="min-h-screen bg-gray-50">
       <ErrorBoundary>
         <Navbar 
-          onUpgradeClick={() => setShowUpgradeDialog(true)} 
           onTemplateSelect={updateTemplate}
           currentTemplate={resumeData.template}
+          aiApiKey={resumeData.aiApiKey}
+          onAiKeyChange={(key) => updateResumeData({ aiApiKey: key })}
         />
       </ErrorBoundary>
       
@@ -95,31 +87,20 @@ export default function ResumeBuilder() {
                 variant="ghost" 
                 onClick={handlePrevious}
                 disabled={isFirstStep}
-                data-testid="button-previous"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Previous
               </Button>
 
-              {/* Save Status Indicator */}
+              {/* Auto-saved indicator */}
               <div className="flex items-center space-x-2 text-sm">
-                {isSaving ? (
-                  <>
-                    <LoadingSpinner size="sm" />
-                    <span className="text-gray-600">Saving...</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span className="text-green-600 font-medium">Saved</span>
-                  </>
-                )}
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <span className="text-green-600 font-medium">Auto-saved</span>
               </div>
               
               <Button 
                 onClick={handleNext}
                 disabled={isLastStep}
-                data-testid="button-next"
               >
                 Next
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -143,7 +124,6 @@ export default function ResumeBuilder() {
             <Button 
               className="fixed bottom-4 right-4 shadow-lg"
               size="lg"
-              data-testid="button-mobile-preview"
             >
               <Eye className="h-5 w-5" />
             </Button>
@@ -158,10 +138,8 @@ export default function ResumeBuilder() {
         </Sheet>
       )}
 
-      <PremiumUpgradeDialog 
-        open={showUpgradeDialog} 
-        onOpenChange={setShowUpgradeDialog} 
-      />
+      {/* Donation Popup */}
+      <DonationPopup open={showDonation} onOpenChange={setShowDonation} />
     </div>
   );
 }
