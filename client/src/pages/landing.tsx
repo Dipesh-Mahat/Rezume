@@ -1,227 +1,157 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
-import { FileText, Users, Download, Crown, LogIn, User, LogOut } from "lucide-react";
-import { AuthDialog } from "@/components/auth/auth-dialog";
-import { PremiumUpgradeDialog } from "@/components/premium/premium-upgrade-dialog";
+import { FileText, Users, Download, Heart, Shield, ArrowRight, Sparkles, CheckCircle } from "lucide-react";
 import { Navbar } from "@/components/navbar";
-import { useAuth } from "@/contexts/auth-context";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { DonationPopup } from "@/components/donation-popup";
 
 export default function LandingPage() {
   const [, setLocation] = useLocation();
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
-  const { user, isAuthenticated, signOut } = useAuth();
-
-  // Check for auth URL parameters
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const authParam = urlParams.get('auth');
-    if (authParam === 'signin' || authParam === 'signup') {
-      setShowAuthDialog(true);
-    }
-  }, []);
-
-  const handleStartBuilding = () => {
-    if (isAuthenticated) {
-      setLocation("/builder");
-    } else {
-      setShowAuthDialog(true);
-    }
-  };
-
-  const handleAuthSuccess = () => {
-    setShowAuthDialog(false);
-    // Redirect to builder after successful authentication
-    setLocation("/builder");
-  };
+  const [showDonation, setShowDonation] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-hero">
-      {/* Navbar */}
-      <Navbar onUpgradeClick={() => setShowUpgradeDialog(true)} />
+    <div className="min-h-screen bg-white">
+      <Navbar />
 
       {/* Hero Section */}
-      <section className="relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <section className="border-b border-slate-100">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
           <div className="text-center">
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6" data-testid="hero-title">
-              Create Professional{" "}
-              <span className="text-blue-600">Resumes</span>
+            <div className="inline-flex items-center px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-xs font-medium mb-6 tracking-wide">
+              <CheckCircle className="w-3.5 h-3.5 mr-1.5" />
+              FREE &middot; NO SIGN-UP &middot; OPEN SOURCE
+            </div>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 mb-5 tracking-tight leading-tight">
+              Build a resume that<br />gets you hired
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto" data-testid="hero-description">
-              Build impressive resumes with our easy-to-use builder. Choose from professional templates 
-              and download your resume as PDF instantly.
+            <p className="text-lg text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">
+              Professional templates, instant PDF export, AI-powered writing.
+              Everything runs in your browser — your data never leaves your device.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
               <Button 
                 size="lg" 
-                onClick={handleStartBuilding}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold shadow-lg"
-                data-testid="button-start-building"
+                onClick={() => setLocation("/builder")}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 h-12 text-base font-medium"
               >
-                <FileText className="mr-2 h-5 w-5" />
-                Start Building Resume
+                <FileText className="mr-2 h-4 w-4" />
+                Start Building
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline"
+                onClick={() => setShowDonation(true)}
+                className="border-slate-300 text-slate-700 hover:bg-slate-50 px-8 h-12 text-base font-medium"
+              >
+                <Heart className="mr-2 h-4 w-4" />
+                Support Us
               </Button>
             </div>
-
-            {/* Feature Highlights */}
-            <div className="grid md:grid-cols-3 gap-8 mt-16">
-              <div className="text-center" data-testid="feature-easy">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FileText className="text-blue-600 h-8 w-8" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Easy to Use</h3>
-                <p className="text-gray-600">Simple step-by-step process to build your resume</p>
-              </div>
-              <div className="text-center" data-testid="feature-templates">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Users className="text-green-600 h-8 w-8" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Professional Templates</h3>
-                <p className="text-gray-600">Choose from carefully designed layouts</p>
-              </div>
-              <div className="text-center" data-testid="feature-export">
-                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Download className="text-purple-600 h-8 w-8" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Download PDF</h3>
-                <p className="text-gray-600">Export your resume as PDF instantly</p>
-              </div>
-            </div>
           </div>
         </div>
       </section>
 
-      {/* Template Preview Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Choose from Professional Templates
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Select from our collection of professionally designed templates. 
-              Free templates to get you started, premium templates for advanced customization.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Premium Features Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center px-4 py-2 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium mb-4">
-              <Crown className="w-4 h-4 mr-2" />
-              Premium Features
-            </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Unlock Premium Templates & Features
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Take your resume to the next level with our premium templates and advanced customization options.
-            </p>
-          </div>
-          
+      {/* Features */}
+      <section className="py-20 bg-slate-50">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-6 rounded-lg border border-gray-200">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <FileText className="text-blue-600 h-6 w-6" />
+            <div className="text-center p-6">
+              <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <Shield className="text-white h-5 w-5" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">15+ Premium Templates</h3>
-              <p className="text-gray-600">Access exclusive templates designed by professionals</p>
+              <h3 className="text-base font-semibold text-slate-900 mb-2">100% Private</h3>
+              <p className="text-sm text-slate-500 leading-relaxed">No servers, no tracking, no accounts. Everything stays in your browser.</p>
             </div>
-            
-            <div className="text-center p-6 rounded-lg border border-gray-200">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Download className="text-green-600 h-6 w-6" />
+            <div className="text-center p-6">
+              <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <Users className="text-white h-5 w-5" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">Unlimited Downloads</h3>
-              <p className="text-gray-600">Download your resume as many times as you need</p>
+              <h3 className="text-base font-semibold text-slate-900 mb-2">14 Pro Templates</h3>
+              <p className="text-sm text-slate-500 leading-relaxed">Modern, classic, creative, executive, industry-specific. All free.</p>
             </div>
-            
-            <div className="text-center p-6 rounded-lg border border-gray-200">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Users className="text-purple-600 h-6 w-6" />
+            <div className="text-center p-6">
+              <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <Download className="text-white h-5 w-5" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">Priority Support</h3>
-              <p className="text-gray-600">Get help when you need it with priority support</p>
+              <h3 className="text-base font-semibold text-slate-900 mb-2">Instant PDF</h3>
+              <p className="text-sm text-slate-500 leading-relaxed">Download a pixel-perfect PDF with one click. No limits ever.</p>
             </div>
           </div>
-          
-          <div className="text-center mt-8">
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-20 bg-white border-t border-slate-100">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-bold text-slate-900 text-center mb-12">
+            Three steps. That's it.
+          </h2>
+          <div className="grid md:grid-cols-3 gap-10">
+            {[
+              { n: "1", t: "Enter your details", d: "Fill in your info, education, experience, and skills step by step." },
+              { n: "2", t: "Pick a template", d: "Choose from 14 professionally designed layouts. Live preview as you type." },
+              { n: "3", t: "Download PDF", d: "Export your polished resume instantly. Ready to send to employers." },
+            ].map((s) => (
+              <div key={s.n} className="text-center">
+                <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-sm font-bold">{s.n}</div>
+                <h3 className="text-base font-semibold text-slate-900 mb-2">{s.t}</h3>
+                <p className="text-sm text-slate-500 leading-relaxed">{s.d}</p>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-12">
             <Button 
               size="lg" 
-              onClick={() => setShowUpgradeDialog(true)}
-              className="bg-yellow-600 hover:bg-yellow-700 text-white px-8 py-4 text-lg font-semibold"
+              onClick={() => setLocation("/builder")}
+              className="bg-slate-900 hover:bg-slate-800 text-white px-8 h-12 text-base font-medium"
             >
-              <Crown className="mr-2 h-5 w-5" />
-              Upgrade to Premium
+              <Sparkles className="mr-2 h-4 w-4" />
+              Get Started Free
             </Button>
           </div>
         </div>
       </section>
 
+      {/* Support Section */}
+      <section className="py-16 bg-slate-50 border-t border-slate-100">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">
+            Help keep Rezume free
+          </h2>
+          <p className="text-slate-500 mb-6 text-sm leading-relaxed">
+            Rezume is free and always will be. If you find it useful, consider
+            supporting us with a small donation.
+          </p>
+          <Button 
+            variant="outline"
+            onClick={() => setShowDonation(true)}
+            className="border-slate-300 text-slate-700 hover:bg-white"
+          >
+            <Heart className="mr-2 h-4 w-4" />
+            Support with Crypto
+          </Button>
+        </div>
+      </section>
+
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Rezume</h3>
-              <p className="text-gray-600 text-sm">
-                Build professional resumes quickly with our simple resume builder.
-              </p>
+      <footer className="border-t border-slate-200 bg-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-6">
+              <span className="font-semibold text-slate-900">Rezume</span>
+              <button onClick={() => setLocation("/builder")} className="text-sm text-slate-500 hover:text-slate-900">Builder</button>
+              <button onClick={() => setShowDonation(true)} className="text-sm text-slate-500 hover:text-slate-900">Support</button>
             </div>
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-4">Resources</h4>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li><a href="#" className="hover:text-gray-900">Templates</a></li>
-                <li><a href="#" className="hover:text-gray-900">Examples</a></li>
-                <li><a href="#" className="hover:text-gray-900">Tips</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-4">Support</h4>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li><a href="#" className="hover:text-gray-900">Help Center</a></li>
-                <li><a href="#" className="hover:text-gray-900">Contact Us</a></li>
-                <li><a href="#" className="hover:text-gray-900">FAQ</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-4">Company</h4>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li><a href="#" className="hover:text-gray-900">About</a></li>
-                <li><a href="#" className="hover:text-gray-900">Privacy</a></li>
-                <li><a href="#" className="hover:text-gray-900">Terms</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-200 mt-8 pt-8 text-center text-sm text-gray-600">
-            <p>&copy; 2025 Rezume. All rights reserved.</p>
+            <p className="text-xs text-slate-400">
+              &copy; {new Date().getFullYear()} Rezume by Dipesh Mahat. Free and open source.
+            </p>
           </div>
         </div>
       </footer>
 
-      {/* Dialogs */}
-      <AuthDialog 
-        open={showAuthDialog} 
-        onOpenChange={setShowAuthDialog}
-        onAuthSuccess={handleAuthSuccess}
-      />
-      
-      <PremiumUpgradeDialog 
-        open={showUpgradeDialog} 
-        onOpenChange={setShowUpgradeDialog}
-        onUpgradeSuccess={() => setShowUpgradeDialog(false)}
-      />
-
-      {/* Template Selector Dialog */}
-            {/* Template Selector Dialog removed - now handled in navbar */}
+      <DonationPopup open={showDonation} onOpenChange={setShowDonation} />
     </div>
   );
 }
