@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Trash2, Sparkles } from "lucide-react";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
+import { AIService } from "@/lib/ai-service";
 
 const experienceListSchema = z.object({
   experience: z.array(experienceSchema.extend({
@@ -123,14 +124,8 @@ export function ExperienceStep({ data, updateData }: ExperienceStepProps) {
 
     setEnhancingIndex(index);
     try {
-      const response = await fetch('/api/ai/enhance-description', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ description, apiKey })
-      });
-
-      if (response.ok) {
-        const result = await response.json();
+      const result = await AIService.enhanceDescription(description, apiKey);
+      if (result.improvedDescription) {
         form.setValue(`experience.${index}.description`, result.improvedDescription);
         toast({
           title: "Description Enhanced",

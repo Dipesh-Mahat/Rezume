@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sparkles, Target, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { AIService } from "@/lib/ai-service";
 
 const summarySchema = z.object({
   summary: z.string().min(50, "Summary should be at least 50 characters").max(500, "Summary should be no more than 500 characters"),
@@ -84,14 +85,8 @@ export function SummaryStep({ data, updateData }: SummaryStepProps) {
 
     setIsEnhancing(true);
     try {
-      const response = await fetch('/api/ai/improve-grammar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: summary, apiKey })
-      });
-
-      if (response.ok) {
-        const result = await response.json();
+      const result = await AIService.improveGrammar(summary, apiKey);
+      if (result.correctedText) {
         form.setValue("summary", result.correctedText);
         toast({
           title: "Grammar Improved",
@@ -135,28 +130,14 @@ export function SummaryStep({ data, updateData }: SummaryStepProps) {
 
     setIsTailoring(true);
     try {
-      const response = await fetch('/api/ai/tailor-resume', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          resume: data, 
-          jobDescription, 
-          apiKey 
-        })
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        if (result.improvements.summary) {
-          form.setValue("summary", result.improvements.summary);
-        }
-        toast({
-          title: "Resume Tailored",
-          description: `Your resume has been optimized for this job. ${result.suggestions.length} suggestions provided.`,
-        });
-      } else {
-        throw new Error('Tailoring failed');
+      const result = await AIService.tailorResume(data, jobDescription, apiKey);
+      if (result.improvements?.summary) {
+        form.setValue("summary", result.improvements.summary);
       }
+      toast({
+        title: "Resume Tailored",
+        description: "Your resume has been optimized for this job.",
+      });
     } catch (error) {
       toast({
         title: "Tailoring Failed",
@@ -223,10 +204,10 @@ export function SummaryStep({ data, updateData }: SummaryStepProps) {
       {/* AI Enhancement Section */}
       {data?.aiApiKey && (
         <div className="space-y-4">
-          <Card className="bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200">
+          <Card className="bg-blue-50 border-blue-200">
             <CardHeader>
               <CardTitle className="text-lg flex items-center">
-                <Sparkles className="mr-2 h-5 w-5 text-purple-600" />
+                <Sparkles className="mr-2 h-5 w-5 text-blue-600" />
                 AI Enhancement Tools
               </CardTitle>
             </CardHeader>
@@ -264,7 +245,7 @@ export function SummaryStep({ data, updateData }: SummaryStepProps) {
               </div>
 
               {showJobDescription && (
-                <div className="space-y-3 pt-4 border-t border-purple-200">
+                <div className="space-y-3 pt-4 border-t border-blue-200">
                   <FormField
                     control={form.control}
                     name="jobDescription"
@@ -311,7 +292,7 @@ export function SummaryStep({ data, updateData }: SummaryStepProps) {
       )}
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h4 className="font-semibold text-blue-900 mb-2">💡 Writing Tips</h4>
+        <h4 className="font-semibold text-blue-900 mb-2">Writing Tips</h4>
         <ul className="text-sm text-blue-800 space-y-1">
           <li>• Start with your years of experience and key expertise</li>
           <li>• Include 2-3 of your most impressive achievements</li>
