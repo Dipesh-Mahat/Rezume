@@ -32,37 +32,37 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
   return (
     <div className="template-modern max-w-none bg-white shadow-xl rounded-lg overflow-hidden">
       {/* Modern Header with Gradient */}
-      <div className="bg-gradient-to-r from-indigo-600 via-blue-600 to-teal-600 text-white p-4 sm:p-6 lg:p-8 mb-4 lg:mb-6">
+      <div className="bg-slate-800 text-white p-4 sm:p-6 lg:p-8 mb-4 lg:mb-6">
         <div className="text-center">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 lg:mb-3 tracking-tight" data-testid="preview-name">
             {personalInfo.fullName || 'Your Name'}
           </h1>
-          <p className="text-lg sm:text-xl font-light mb-4 lg:mb-6 text-blue-100" data-testid="preview-title">
+          <p className="text-lg sm:text-xl font-light mb-4 lg:mb-6 text-slate-300" data-testid="preview-title">
             {personalInfo.title || 'Your Professional Title'}
           </p>
           
           <div className="flex flex-wrap justify-center gap-2 sm:gap-4 text-blue-100" data-testid="preview-contact">
             {personalInfo.email && (
               <div className="flex items-center bg-white bg-opacity-20 rounded-full px-2 sm:px-3 lg:px-4 py-1 sm:py-2 text-sm sm:text-base">
-                <span className="mr-2">✉️</span>
+                <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                 <span className="font-medium" data-testid="preview-email">{personalInfo.email}</span>
               </div>
             )}
             {personalInfo.phone && (
               <div className="flex items-center bg-white bg-opacity-20 rounded-full px-2 sm:px-3 lg:px-4 py-1 sm:py-2 text-sm sm:text-base">
-                <span className="mr-2">📞</span>
+                <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
                 <span className="font-medium" data-testid="preview-phone">{personalInfo.phone}</span>
               </div>
             )}
             {personalInfo.location && (
               <div className="flex items-center bg-white bg-opacity-20 rounded-full px-2 sm:px-3 lg:px-4 py-1 sm:py-2 text-sm sm:text-base">
-                <span className="mr-2">🌍</span>
+                <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                 <span className="font-medium" data-testid="preview-location">{personalInfo.location}</span>
               </div>
             )}
             {personalInfo.linkedin && (
               <div className="flex items-center bg-white bg-opacity-20 rounded-full px-2 sm:px-3 lg:px-4 py-1 sm:py-2 text-sm sm:text-base">
-                <span className="mr-2">💼</span>
+                <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
                 <a 
                   href={personalInfo.linkedin} 
                   className="font-medium hover:underline text-white"
@@ -83,10 +83,10 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
         {summary && (
           <div className="mb-6 lg:mb-8">
             <div className="flex items-center mb-3 lg:mb-4">
-              <div className="w-6 lg:w-8 h-0.5 bg-gradient-to-r from-indigo-500 to-blue-500 mr-2 lg:mr-3"></div>
+              <div className="w-6 lg:w-8 h-0.5 bg-slate-800 mr-2 lg:mr-3"></div>
               <h2 className="text-xl lg:text-2xl font-bold text-gray-900">Professional Summary</h2>
             </div>
-            <div className="bg-gray-50 rounded-lg p-6 border-l-4 border-indigo-500">
+            <div className="bg-gray-50 rounded-lg p-6 border-l-4 border-slate-700">
               <p className="text-gray-700 leading-relaxed font-light" data-testid="preview-summary">
                 {summary}
               </p>
@@ -98,7 +98,7 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
         {experience.length > 0 && (
           <div className="mb-8">
             <div className="flex items-center mb-6">
-              <div className="w-8 h-0.5 bg-gradient-to-r from-indigo-500 to-blue-500 mr-3"></div>
+              <div className="w-8 h-0.5 bg-slate-800 mr-3"></div>
               <h2 className="text-2xl font-bold text-gray-900">Professional Experience</h2>
             </div>
             
@@ -110,7 +110,7 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
                       <h3 className="text-xl font-bold text-gray-900 mb-1" data-testid={`exp-title-${index}`}>
                         {exp.title}
                       </h3>
-                      <h4 className="text-lg font-semibold text-indigo-600 mb-2" data-testid={`exp-company-${index}`}>
+                      <h4 className="text-lg font-semibold text-slate-700 mb-2" data-testid={`exp-company-${index}`}>
                         {exp.company}
                       </h4>
                     </div>
@@ -133,7 +133,7 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
                       <ul className="space-y-1">
                         {exp.achievements.map((achievement: string, achievementIndex: number) => (
                           <li key={achievementIndex} className="flex items-start">
-                            <span className="w-2 h-2 bg-indigo-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                            <span className="w-2 h-2 bg-slate-700 rounded-full mt-2 mr-3 flex-shrink-0"></span>
                             <span className="text-gray-700 text-sm leading-relaxed">
                               {achievement}
                             </span>
@@ -152,7 +152,7 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
         {education.length > 0 && (
           <div className="mb-8">
             <div className="flex items-center mb-6">
-              <div className="w-8 h-0.5 bg-gradient-to-r from-indigo-500 to-blue-500 mr-3"></div>
+              <div className="w-8 h-0.5 bg-slate-800 mr-3"></div>
               <h2 className="text-2xl font-bold text-gray-900">Education</h2>
             </div>
             
@@ -164,7 +164,7 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
                       <h3 className="text-lg font-bold text-gray-900" data-testid={`edu-degree-${index}`}>
                         {edu.degree}
                       </h3>
-                      <h4 className="text-base font-semibold text-indigo-600" data-testid={`edu-school-${index}`}>
+                      <h4 className="text-base font-semibold text-slate-700" data-testid={`edu-school-${index}`}>
                         {edu.school}
                       </h4>
                     </div>
@@ -185,11 +185,11 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
         {skills.length > 0 && (
           <div className="mb-8">
             <div className="flex items-center mb-6">
-              <div className="w-8 h-0.5 bg-gradient-to-r from-indigo-500 to-blue-500 mr-3"></div>
+              <div className="w-8 h-0.5 bg-slate-800 mr-3"></div>
               <h2 className="text-2xl font-bold text-gray-900">Technical Skills</h2>
             </div>
             
-            <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg p-6">
+            <div className="bg-gray-50 rounded-lg p-6">
               {/* Group skills by category */}
               {Array.from(new Set(skills.map((skill: any) => skill.category).filter(Boolean))).map((category: any) => (
                 <div key={category} className="mb-4 last:mb-0">
@@ -203,8 +203,8 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
                         <span 
                           key={skill.id || index} 
                           className={`px-3 py-2 rounded-full text-sm font-medium ${
-                            skill.level === 'expert' ? 'bg-indigo-600 text-white' :
-                            skill.level === 'advanced' ? 'bg-indigo-100 text-indigo-800' :
+                            skill.level === 'expert' ? 'bg-slate-800 text-white' :
+                            skill.level === 'advanced' ? 'bg-slate-200 text-slate-800' :
                             'bg-gray-200 text-gray-800'
                           }`}
                           data-testid={`preview-skill-${index}`}
