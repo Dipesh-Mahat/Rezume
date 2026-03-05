@@ -1,9 +1,6 @@
-import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+﻿import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Crown, Lock, Eye } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { ModernTemplate } from "@/components/resume-templates/modern-template";
 import { ClassicTemplate } from "@/components/resume-templates/classic-template";
 import { ProfessionalTemplate } from "@/components/resume-templates/professional-template";
@@ -19,403 +16,166 @@ import { MarketingTemplate } from "@/components/resume-templates/marketing-templ
 import { TeacherTemplate } from "@/components/resume-templates/teacher-template";
 import { FinanceTemplate } from "@/components/resume-templates/finance-template";
 
-interface TemplateOption {
-  id: string;
-  name: string;
-  description: string;
-  component: React.ComponentType<any>;
-  isPremium: boolean;
-  category: 'modern' | 'classic' | 'creative' | 'executive' | 'tech' | 'healthcare' | 'marketing' | 'education' | 'finance';
-  previewImage?: string;
-}
-
-// Ensure sampleResumeData is properly initialized with all required fields
-const sampleResumeData = {
+const previewData = {
   personalInfo: {
-    fullName: "Sarah Johnson",
-    title: "Senior Software Engineer",
-    email: "sarah.johnson@email.com",
-    phone: "(555) 123-4567",
-    location: "San Francisco, CA",
-    linkedin: "linkedin.com/in/sarahjohnson"
+    fullName: "Dipesh Mahat",
+    title: "Full Stack Developer",
+    email: "dipesh.mahat@gmail.com",
+    phone: "+977 984-1234567",
+    location: "Kathmandu, Nepal",
+    linkedin: "linkedin.com/in/dipeshmahat"
   },
-  summary: "Experienced software engineer with 8+ years developing scalable web applications. Expertise in React, Node.js, and cloud technologies. Passionate about creating user-centric solutions and leading high-performing teams.",
+  summary: "Passionate Full Stack Developer with expertise in React, TypeScript, and Node.js. Experienced in building fast, user-friendly web applications from concept to deployment.",
   experience: [
     {
-      title: "Senior Software Engineer",
-      company: "TechCorp Inc.",
-      startDate: "Jan 2020",
+      title: "Full Stack Developer",
+      company: "Freelance",
+      startDate: "Jan 2023",
       endDate: "Present",
       current: true,
-      description: "Lead development of customer-facing web applications serving 1M+ users.",
+      description: "Built production web applications for clients using React, Node.js, and PostgreSQL.",
       achievements: [
-        "Improved application performance by 40% through optimization",
-        "Led team of 5 developers in agile development process",
-        "Architected microservices infrastructure reducing deployment time by 60%"
+        "Delivered 10+ production applications with 100% client satisfaction",
+        "Reduced page load time by 50% through optimization",
+        "Built a resume-builder SaaS tool used by 500+ users monthly"
       ]
     },
     {
-      title: "Software Engineer",
-      company: "StartupXYZ",
-      startDate: "Jun 2018",
-      endDate: "Dec 2019",
+      title: "Junior Web Developer",
+      company: "Tech Solutions Nepal",
+      startDate: "Mar 2021",
+      endDate: "Dec 2022",
       current: false,
-      description: "Developed full-stack applications using modern web technologies.",
+      description: "Developed responsive websites for local businesses.",
       achievements: [
-        "Built responsive web applications using React and TypeScript",
-        "Implemented RESTful APIs serving 50K+ daily requests",
-        "Mentored junior developers and conducted code reviews"
+        "Built 20+ responsive websites using React and JavaScript",
+        "Integrated payment gateways and third-party REST APIs"
       ]
     }
   ],
   education: [
     {
-      degree: "Bachelor of Science in Computer Science",
-      school: "University of California, Berkeley",
-      graduationYear: "2018",
-      gpa: "3.8"
+      degree: "Bachelor of Information Technology",
+      school: "Tribhuvan University",
+      graduationYear: "2022",
+      gpa: "3.7"
     }
   ],
   skills: [
-    { name: "JavaScript", category: "programming", level: "expert" },
     { name: "React", category: "frontend", level: "expert" },
-    { name: "Node.js", category: "backend", level: "advanced" },
     { name: "TypeScript", category: "programming", level: "advanced" },
-    { name: "AWS", category: "cloud", level: "intermediate" },
-    { name: "Docker", category: "devops", level: "intermediate" }
+    { name: "Node.js", category: "backend", level: "advanced" },
+    { name: "Tailwind CSS", category: "frontend", level: "expert" },
+    { name: "PostgreSQL", category: "database", level: "intermediate" },
+    { name: "Git", category: "tools", level: "advanced" }
   ]
 };
 
-
-const templates: TemplateOption[] = [
-  {
-    id: "modern",
-    name: "Modern",
-    description: "Clean and contemporary design perfect for tech roles",
-    component: ModernTemplate,
-    isPremium: false,
-    category: 'modern'
-  },
-  {
-    id: "professional",
-    name: "Professional",
-    description: "Traditional layout ideal for corporate positions",
-    component: ProfessionalTemplate,
-    isPremium: false,
-    category: 'classic'
-  },
-  {
-    id: "classic",
-    name: "Classic",
-    description: "Timeless design that works for any industry",
-    component: ClassicTemplate,
-    isPremium: false,
-    category: 'classic'
-  },
-  {
-    id: "minimalist",
-    name: "Minimalist",
-    description: "Simple and elegant with focus on content",
-    component: MinimalistTemplate,
-    isPremium: true,
-    category: 'modern'
-  },
-  {
-    id: "creative",
-    name: "Creative",
-    description: "Eye-catching design for creative professionals",
-    component: CreativeTemplate,
-    isPremium: true,
-    category: 'creative'
-  },
-  {
-    id: "executive",
-    name: "Executive",
-    description: "Sophisticated layout for senior positions",
-    component: ExecutiveTemplate,
-    isPremium: true,
-    category: 'executive'
-  },
-  // Premium templates
-  {
-    id: "modern-pro",
-    name: "Modern Pro",
-    description: "Enhanced modern template with gradient accents and advanced styling",
-    component: ModernProTemplate,
-    isPremium: true,
-    category: 'modern'
-  },
-  {
-    id: "creative-bold",
-    name: "Creative Bold",
-    description: "Bold and vibrant design with colorful sidebar for standout applications",
-    component: CreativeBoldTemplate,
-    isPremium: true,
-    category: 'creative'
-  },
-  {
-    id: "executive-elite",
-    name: "Executive Elite",
-    description: "Premium executive template with luxury dark header and professional layout",
-    component: ExecutiveEliteTemplate,
-    isPremium: true,
-    category: 'executive'
-  },
-  {
-    id: "tech",
-    name: "Tech Innovator",
-    description: "Modern template designed for software engineers and tech professionals",
-    component: TechTemplate,
-    isPremium: false,
-    category: 'tech'
-  },
-  {
-    id: "marketing",
-    name: "Marketing Pro",
-    description: "Vibrant and creative template perfect for marketing and sales professionals",
-    component: MarketingTemplate,
-    isPremium: true,
-    category: 'marketing'
-  },
-  {
-    id: "teacher",
-    name: "Education Elite",
-    description: "Professional template tailored for educators and academic professionals",
-    component: TeacherTemplate,
-    isPremium: true,
-    category: 'education'
-  },
-  {
-    id: "finance",
-    name: "Finance Pro",
-    description: "Sophisticated template designed for finance and accounting professionals",
-    component: FinanceTemplate,
-    isPremium: true,
-    category: 'finance'
-  }
+const templates = [
+  { id: "modern",         name: "Modern",          description: "Clean contemporary design for tech and corporate roles",       component: ModernTemplate },
+  { id: "professional",   name: "Professional",     description: "Traditional layout ideal for corporate positions",             component: ProfessionalTemplate },
+  { id: "classic",        name: "Classic",          description: "Timeless design that works for any industry",                 component: ClassicTemplate },
+  { id: "minimalist",     name: "Minimalist",       description: "Simple and elegant with full focus on content",               component: MinimalistTemplate },
+  { id: "creative",       name: "Creative",         description: "Eye-catching sidebar design for creative professionals",      component: CreativeTemplate },
+  { id: "executive",      name: "Executive",        description: "Sophisticated layout for senior-level positions",             component: ExecutiveTemplate },
+  { id: "modern-pro",     name: "Modern Pro",       description: "Enhanced modern design with refined typography",              component: ModernProTemplate },
+  { id: "creative-bold",  name: "Creative Bold",    description: "Bold and vibrant design for standout applications",           component: CreativeBoldTemplate },
+  { id: "executive-elite",name: "Executive Elite",  description: "Luxury dark header for C-suite and executive roles",          component: ExecutiveEliteTemplate },
+  { id: "tech",           name: "Tech",             description: "Developer-focused layout with skills matrix",                 component: TechTemplate },
+  { id: "healthcare",     name: "Healthcare",       description: "Clinical and professional design for medical roles",          component: HealthcareTemplate },
+  { id: "marketing",      name: "Marketing",        description: "Vibrant and results-driven for sales and marketing",          component: MarketingTemplate },
+  { id: "teacher",        name: "Education",        description: "Warm and structured layout for educators",                    component: TeacherTemplate },
+  { id: "finance",        name: "Finance",          description: "Sophisticated design for finance and accounting",             component: FinanceTemplate },
 ];
 
 interface VisualTemplateSelectorProps {
   selectedTemplate: string;
   onTemplateSelect: (templateId: string) => void;
-  userPlan?: 'free' | 'premium';
-  onUpgradeClick?: () => void;
 }
 
-export function VisualTemplateSelector({ 
-  selectedTemplate, 
-  onTemplateSelect, 
-  userPlan = 'free',
-  onUpgradeClick 
-}: VisualTemplateSelectorProps) {
-  const [previewTemplate, setPreviewTemplate] = useState<TemplateOption | null>(null);
-  const [filter, setFilter] = useState<'all' | 'free' | 'premium'>('all');
+export function VisualTemplateSelector({ selectedTemplate, onTemplateSelect }: VisualTemplateSelectorProps) {
+  const initialIndex = templates.findIndex(t => t.id === selectedTemplate);
+  const [index, setIndex] = useState(initialIndex >= 0 ? initialIndex : 0);
 
-  const filteredTemplates = templates.filter(template => {
-    if (filter === 'free') return !template.isPremium;
-    if (filter === 'premium') return template.isPremium;
-    return true;
-  });
+  const prev = () => setIndex(i => (i === 0 ? templates.length - 1 : i - 1));
+  const next = () => setIndex(i => (i === templates.length - 1 ? 0 : i + 1));
 
-  const handleTemplateClick = (template: TemplateOption) => {
-    if (template.isPremium && userPlan === 'free') {
-      onUpgradeClick?.();
-      return;
-    }
-    onTemplateSelect(template.id);
-  };
-
-  const renderTemplatePreview = (template: TemplateOption) => {
-    if (!template || !template.component) {
-      return <div>Template not available</div>;
-    }
-    
-    const TemplateComponent = template.component;
-    // Make sure we have sample data with required fields
-    const safeResumeData = {
-      ...sampleResumeData,
-      personalInfo: sampleResumeData.personalInfo || {
-        fullName: "Sample Name",
-        title: "Sample Title",
-        email: "sample@example.com",
-        phone: "(555) 123-4567",
-        location: "Sample Location"
-      }
-    };
-    
-    try {
-      return (
-        <div className="w-full h-full scale-[0.25] origin-top-left transform">
-          <div className="w-[800px] h-[1000px]">
-            <TemplateComponent resumeData={safeResumeData} />
-          </div>
-        </div>
-      );
-    } catch (error) {
-      console.error("Error rendering template preview:", error);
-      return <div>Failed to render template</div>;
-    }
-  };
+  const template = templates[index];
+  const TemplateComponent = template.component;
+  const isSelected = selectedTemplate === template.id;
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 space-y-4">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">Choose Your Template</h2>
-        <div className="flex space-x-2">
+        <h2 className="text-lg font-bold text-slate-900">Choose Template</h2>
+        <span className="text-sm text-slate-400 tabular-nums">{index + 1} / {templates.length}</span>
+      </div>
+
+      {/* Carousel */}
+      <div className="flex items-center gap-3">
+        {/* Prev */}
+        <button
+          onClick={prev}
+          className="flex-shrink-0 w-9 h-9 rounded-full border border-slate-200 bg-white hover:bg-slate-50 flex items-center justify-center transition-colors shadow-sm"
+        >
+          <ChevronLeft className="w-5 h-5 text-slate-600" />
+        </button>
+
+        {/* Preview */}
+        <div className="flex-1 flex flex-col gap-3">
+          {/* Template preview box */}
+          <div className="w-full rounded-xl border border-slate-200 bg-slate-50 overflow-hidden shadow-sm" style={{ height: "420px" }}>
+            <div className="w-full h-full relative overflow-hidden">
+              <div style={{ transform: "scale(0.48)", transformOrigin: "top left", width: "208%", height: "208%", pointerEvents: "none" }}>
+                <TemplateComponent resumeData={previewData} />
+              </div>
+            </div>
+          </div>
+
+          {/* Template info */}
+          <div className="text-center px-2">
+            <h3 className="font-semibold text-slate-900 text-base">{template.name}</h3>
+            <p className="text-sm text-slate-500 mt-0.5 leading-relaxed">{template.description}</p>
+          </div>
+
+          {/* Dot indicators */}
+          <div className="flex items-center justify-center gap-1.5 flex-wrap">
+            {templates.map((t, i) => (
+              <button
+                key={t.id}
+                onClick={() => setIndex(i)}
+                className={`w-1.5 h-1.5 rounded-full transition-all ${
+                  i === index ? "bg-blue-600 w-4" : "bg-slate-300 hover:bg-slate-400"
+                }`}
+              />
+            ))}
+          </div>
+
+          {/* Use button */}
           <Button
-            variant={filter === 'all' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setFilter('all')}
+            onClick={() => onTemplateSelect(template.id)}
+            className={isSelected
+              ? "w-full bg-green-600 hover:bg-green-700 text-white"
+              : "w-full bg-blue-600 hover:bg-blue-700 text-white"
+            }
           >
-            All Templates
-          </Button>
-          <Button
-            variant={filter === 'free' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setFilter('free')}
-          >
-            Free
-          </Button>
-          <Button
-            variant={filter === 'premium' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setFilter('premium')}
-          >
-            <Crown className="w-4 h-4 mr-1" />
-            Premium
+            {isSelected ? (
+              <><Check className="w-4 h-4 mr-2" /> Currently Selected</>
+            ) : (
+              "Use This Template"
+            )}
           </Button>
         </div>
+
+        {/* Next */}
+        <button
+          onClick={next}
+          className="flex-shrink-0 w-9 h-9 rounded-full border border-slate-200 bg-white hover:bg-slate-50 flex items-center justify-center transition-colors shadow-sm"
+        >
+          <ChevronRight className="w-5 h-5 text-slate-600" />
+        </button>
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredTemplates.map((template) => (
-          <Card 
-            key={template.id} 
-            className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
-              selectedTemplate === template.id 
-                ? 'ring-2 ring-blue-500 border-blue-500' 
-                : 'hover:border-gray-300'
-            } ${template.isPremium && userPlan === 'free' ? 'opacity-75' : ''}`}
-            onClick={() => handleTemplateClick(template)}
-          >
-            <CardContent className="p-4">
-              <div className="relative">
-                {/* Template Preview */}
-                <div className="w-full h-48 bg-gray-50 border rounded-lg overflow-hidden relative">
-                  {renderTemplatePreview(template)}
-                  
-                  {/* Overlay for premium templates */}
-                  {template.isPremium && userPlan === 'free' && (
-                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                      <div className="text-center text-white">
-                        <Lock className="w-8 h-8 mx-auto mb-2" />
-                        <p className="text-sm font-medium">Premium Template</p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Preview Button */}
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setPreviewTemplate(template);
-                    }}
-                  >
-                    <Eye className="w-4 h-4" />
-                  </Button>
-                </div>
-
-                {/* Template Info */}
-                <div className="mt-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold text-gray-900">{template.name}</h3>
-                    {template.isPremium && (
-                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                        <Crown className="w-3 h-3 mr-1" />
-                        Premium
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-600">{template.description}</p>
-                </div>
-
-                {/* Selected Indicator */}
-                {selectedTemplate === template.id && (
-                  <div className="absolute top-2 left-2 bg-blue-500 text-white rounded-full p-1">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Template Preview Dialog */}
-      <Dialog open={!!previewTemplate} onOpenChange={() => setPreviewTemplate(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center space-x-2">
-              <span>{previewTemplate?.name} Template</span>
-              {previewTemplate?.isPremium && (
-                <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                  <Crown className="w-3 h-3 mr-1" />
-                  Premium
-                </Badge>
-              )}
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="mt-4">
-            {previewTemplate && (
-              <div className="w-full border rounded-lg overflow-hidden bg-white">
-                {(() => {
-                  try {
-                    // Make sure we have sample data with required fields
-                    const safeResumeData = {
-                      ...sampleResumeData,
-                      personalInfo: sampleResumeData.personalInfo || {
-                        fullName: "Sample Name",
-                        title: "Sample Title",
-                        email: "sample@example.com",
-                        phone: "(555) 123-4567",
-                        location: "Sample Location"
-                      }
-                    };
-                    
-                    return <previewTemplate.component resumeData={safeResumeData} />;
-                  } catch (error) {
-                    console.error("Error rendering template preview:", error);
-                    return <div className="p-4">Failed to render template preview</div>;
-                  }
-                })()}
-              </div>
-            )}
-          </div>
-
-          <div className="flex justify-end space-x-3 mt-6">
-            <Button variant="outline" onClick={() => setPreviewTemplate(null)}>
-              Close
-            </Button>
-            {previewTemplate && (
-              <Button onClick={() => {
-                handleTemplateClick(previewTemplate);
-                setPreviewTemplate(null);
-              }}>
-                {previewTemplate.isPremium && userPlan === 'free' 
-                  ? 'Upgrade to Use' 
-                  : 'Select Template'
-                }
-              </Button>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

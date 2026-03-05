@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Download, Palette, AlertTriangle } from "lucide-react";
+import { Download, AlertTriangle } from "lucide-react";
 import { ModernTemplate } from "@/components/resume-templates/modern-template";
 import { ClassicTemplate } from "@/components/resume-templates/classic-template";
 import { ProfessionalTemplate } from "@/components/resume-templates/professional-template";
@@ -11,11 +10,12 @@ import { ExecutiveTemplate } from "@/components/resume-templates/executive-templ
 import { ModernProTemplate } from "@/components/resume-templates/modern-pro-template";
 import { CreativeBoldTemplate } from "@/components/resume-templates/creative-bold-template";
 import { ExecutiveEliteTemplate } from "@/components/resume-templates/executive-elite-template";
-import { VisualTemplateSelector } from "@/components/template-selector/visual-template-selector";
-import { PremiumUpgradeDialog } from "@/components/premium/premium-upgrade-dialog";
-import { useAuth } from "@/contexts/auth-context";
+import { TechTemplate } from "@/components/resume-templates/tech-template";
+import { HealthcareTemplate } from "@/components/resume-templates/healthcare-template";
+import { MarketingTemplate } from "@/components/resume-templates/marketing-template";
+import { TeacherTemplate } from "@/components/resume-templates/teacher-template";
+import { FinanceTemplate } from "@/components/resume-templates/finance-template";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ErrorBoundary } from "@/components/error-boundary";
 
 interface ResumePreviewProps {
@@ -24,106 +24,61 @@ interface ResumePreviewProps {
 }
 
 const templates = [
-  { id: "modern", name: "Modern", component: ModernTemplate, isPremium: false },
-  { id: "classic", name: "Classic", component: ClassicTemplate, isPremium: false },
-  { id: "professional", name: "Professional", component: ProfessionalTemplate, isPremium: false },
-  { id: "creative", name: "Creative Designer", component: CreativeTemplate, isPremium: true },
-  { id: "minimalist", name: "Clean Minimalist", component: MinimalistTemplate, isPremium: true },
-  { id: "executive", name: "Executive Traditional", component: ExecutiveTemplate, isPremium: true },
-  { id: "modern-pro", name: "Modern Pro", component: ModernProTemplate, isPremium: true },
-  { id: "creative-bold", name: "Creative Bold", component: CreativeBoldTemplate, isPremium: true },
-  { id: "executive-elite", name: "Executive Elite", component: ExecutiveEliteTemplate, isPremium: true },
+  { id: "modern", name: "Modern", component: ModernTemplate },
+  { id: "classic", name: "Classic", component: ClassicTemplate },
+  { id: "professional", name: "Professional", component: ProfessionalTemplate },
+  { id: "creative", name: "Creative Designer", component: CreativeTemplate },
+  { id: "minimalist", name: "Clean Minimalist", component: MinimalistTemplate },
+  { id: "executive", name: "Executive Traditional", component: ExecutiveTemplate },
+  { id: "modern-pro", name: "Modern Pro", component: ModernProTemplate },
+  { id: "creative-bold", name: "Creative Bold", component: CreativeBoldTemplate },
+  { id: "executive-elite", name: "Executive Elite", component: ExecutiveEliteTemplate },
+  { id: "tech", name: "Tech Innovator", component: TechTemplate },
+  { id: "healthcare", name: "Healthcare Pro", component: HealthcareTemplate },
+  { id: "marketing", name: "Marketing Pro", component: MarketingTemplate },
+  { id: "teacher", name: "Education Elite", component: TeacherTemplate },
+  { id: "finance", name: "Finance Pro", component: FinanceTemplate },
 ];
 
 export function ResumePreview({ resumeData, updateTemplate }: ResumePreviewProps) {
   const [selectedTemplate, setSelectedTemplate] = useState(resumeData?.template || "modern");
   const [isExporting, setIsExporting] = useState(false);
-  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
-  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
-  const { user } = useAuth();
   const { toast } = useToast();
 
   const SelectedTemplateComponent = templates.find(t => t.id === selectedTemplate)?.component || ModernTemplate;
 
   const handleTemplateChange = (templateId: string) => {
-    const template = templates.find(t => t.id === templateId);
-    
-    if (template?.isPremium && user?.plan === 'free') {
-      setShowUpgradeDialog(true);
-      return;
-    }
-    
     setSelectedTemplate(templateId);
     updateTemplate?.(templateId);
-    setShowTemplateSelector(false);
   };
 
   const exportToPDF = async () => {
     setIsExporting(true);
     try {
-      // Get the resume HTML content
       const resumeElement = document.getElementById('resume-content');
       if (!resumeElement) {
         throw new Error('Resume content not found');
       }
 
-      const response = await fetch('/api/export/pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          html: `
-            <html>
-              <head>
-                <style>
-                  body { 
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                    font-size: 14px;
-                    line-height: 1.4;
-                    color: #1f2937;
-                    margin: 0;
-                    padding: 20px;
-                  }
-                  .resume-preview { max-width: none; }
-                  .resume-preview h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
-                  .resume-preview h2 { font-size: 16px; font-weight: 600; border-bottom: 2px solid #4f46e5; padding-bottom: 4px; margin-bottom: 12px; margin-top: 16px; }
-                  .resume-preview h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-                  .resume-preview .contact-info { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; margin-bottom: 20px; }
-                  .resume-preview .skills-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-                  .resume-preview .skill-tag { background: #f3f4f6; padding: 4px 12px; border-radius: 16px; font-size: 12px; }
-                  .resume-preview .experience-item { margin-bottom: 16px; }
-                  .resume-preview .experience-header { display: flex; justify-content: between; align-items: flex-start; margin-bottom: 8px; }
-                  .resume-preview .experience-date { font-size: 12px; color: #6b7280; }
-                  .resume-preview ul { margin: 8px 0; padding-left: 20px; }
-                  .resume-preview li { margin-bottom: 4px; }
-                </style>
-              </head>
-              <body>
-                ${resumeElement.outerHTML}
-              </body>
-            </html>
-          `
-        })
-      });
+      // Dynamic import of html2pdf
+      const html2pdf = (await import('html2pdf.js')).default;
+      
+      const opt = {
+        margin: 0,
+        filename: `${resumeData?.personalInfo?.fullName || 'resume'}_resume.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' as const },
+      };
 
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = `${resumeData?.personalInfo?.fullName || 'resume'}_resume.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        
-        toast({
-          title: "PDF Downloaded",
-          description: "Your resume has been successfully exported to PDF.",
-        });
-      } else {
-        throw new Error('PDF export failed');
-      }
+      await html2pdf().set(opt).from(resumeElement).save();
+      
+      toast({
+        title: "PDF Downloaded",
+        description: "Your resume has been successfully exported to PDF.",
+      });
     } catch (error) {
+      console.error('PDF export error:', error);
       toast({
         title: "Export Failed",
         description: "Unable to export PDF. Please try again.",
@@ -138,7 +93,7 @@ export function ResumePreview({ resumeData, updateTemplate }: ResumePreviewProps
     <div className="w-full">
       {/* Preview Header */}
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-semibold text-gray-900" data-testid="preview-title">
+        <h3 className="text-lg font-semibold text-gray-900">
           Live Preview
         </h3>
         <div className="flex space-x-2">
@@ -146,7 +101,6 @@ export function ResumePreview({ resumeData, updateTemplate }: ResumePreviewProps
             onClick={exportToPDF}
             disabled={isExporting}
             className="bg-blue-600 hover:bg-blue-700 text-white"
-            data-testid="button-export-pdf"
           >
             {isExporting ? (
               <>
@@ -183,7 +137,6 @@ export function ResumePreview({ resumeData, updateTemplate }: ResumePreviewProps
           )}>
             {(() => {
               try {
-                // Make sure resumeData has all required fields with fallback values
                 const safeResumeData = {
                   ...resumeData,
                   personalInfo: resumeData?.personalInfo || {
@@ -215,13 +168,6 @@ export function ResumePreview({ resumeData, updateTemplate }: ResumePreviewProps
           </ErrorBoundary>
         </div>
       </div>
-
-      {/* Dialogs */}
-      <PremiumUpgradeDialog 
-        open={showUpgradeDialog} 
-        onOpenChange={setShowUpgradeDialog}
-        onUpgradeSuccess={() => setShowUpgradeDialog(false)}
-      />
     </div>
   );
 }
